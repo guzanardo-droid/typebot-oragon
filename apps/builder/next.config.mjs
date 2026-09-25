@@ -65,14 +65,22 @@ const nextConfig = {
   outputFileTracingRoot: join(__dirname, "../../"),
   headers: async () => {
     const isDev = process.env.NODE_ENV !== "production";
+    // Oragon: origens autorizadas a embutir o editor (menu Bot do CRM),
+    // separadas por espaço. Com a lista definida, o X-Frame-Options sai —
+    // ele não aceita lista e o frame-ancestors passa a ser a única regra.
+    const frameAncestors = (process.env.ORAGON_FRAME_ANCESTORS ?? "").trim();
     return [
       {
         source: "/(.*)?",
         headers: [
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
+          ...(frameAncestors
+            ? []
+            : [
+                {
+                  key: "X-Frame-Options",
+                  value: "SAMEORIGIN",
+                },
+              ]),
           {
             key: "X-Content-Type-Options",
             value: "nosniff",
@@ -92,7 +100,7 @@ const nextConfig = {
               `media-src 'self' blob: https:${isDev ? " http://localhost:* " : ""}`,
               "worker-src 'self' blob:",
               "object-src 'none'",
-              "frame-ancestors 'self'",
+              `frame-ancestors 'self'${frameAncestors ? ` ${frameAncestors}` : ""}`,
               "form-action 'self'",
               "base-uri 'self'",
             ].join("; "),

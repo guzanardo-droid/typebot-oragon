@@ -107,6 +107,25 @@ const nextConfig = {
           },
         ],
       },
+      // Oragon: o CRM pergunta "estou logado no editor?" antes de abrir o
+      // editor embutido (senão mostraria o 404 do Typebot e o usuário tentaria
+      // logar DENTRO do iframe, onde o Google não deixa). Só a origem do CRM
+      // lê, e só a própria sessão (o cookie é do navegador de quem pergunta).
+      ...(frameAncestors
+        ? [
+            {
+              source: "/api/auth/session",
+              headers: [
+                {
+                  key: "Access-Control-Allow-Origin",
+                  value: process.env.ORAGON_CRM_ORIGIN || "https://www.oragon.app.br",
+                },
+                { key: "Access-Control-Allow-Credentials", value: "true" },
+                { key: "Vary", value: "Origin" },
+              ],
+            },
+          ]
+        : []),
       {
         source: "/((?!api).*)",
         headers: [

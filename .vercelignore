@@ -1,0 +1,8 @@
+# Oragon: pastas grandes que não entram no build do editor nem dos bots
+apps/landing-page/public
+apps/landing-page/src
+apps/landing-page/content
+apps/docs/images
+apps/docs/openapi
+plans
+tests

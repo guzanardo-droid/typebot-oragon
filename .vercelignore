@@ -1,8 +1,5 @@
-# Oragon: pastas grandes que não entram no build do editor nem dos bots
+# Oragon: arquivos grandes que não entram no build do editor nem dos bots.
+# Cuidado: o grafo do nx lê o vite.config de TODOS os apps — não ignorar
+# código-fonte (apps/*/src), só imagens estáticas.
 apps/landing-page/public
-apps/landing-page/src
-apps/landing-page/content
 apps/docs/images
-apps/docs/openapi
-plans
-tests

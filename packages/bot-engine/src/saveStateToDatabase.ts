@@ -6,6 +6,7 @@ import type { ChatSession } from "@typebot.io/chat-session/schemas";
 import prisma from "@typebot.io/prisma";
 import type { Prisma } from "@typebot.io/prisma/types";
 import type { SetVariableHistoryItem } from "@typebot.io/variables/schemas";
+import { notificarOragon } from "./oragon/notificarOragon";
 import { upsertResult } from "./queries/upsertResult";
 
 type Props = {
@@ -82,13 +83,15 @@ export const saveStateToDatabase = async ({
 
   const answers = state.typebotsQueue[0].answers;
 
+  const isResultCompleted = Boolean(
+    !input && !containsSetVariableClientSideAction && answers.length > 0,
+  );
+
   queries.push(
     upsertResult({
       resultId,
       typebot: state.typebotsQueue[0].typebot,
-      isCompleted: Boolean(
-        !input && !containsSetVariableClientSideAction && answers.length > 0,
-      ),
+      isCompleted: isResultCompleted,
       hasStarted: answers.length > 0,
       lastChatSessionId: session.id,
       logs,
@@ -98,6 +101,10 @@ export const saveStateToDatabase = async ({
   );
 
   await prisma.$transaction(queries);
+
+  // Oragon: integração automática com o CRM (sem bloco HTTP no fluxo).
+  if (sessionId.type !== "newPreview" && answers.length > 0)
+    notificarOragon({ state, resultId, isCompleted: isResultCompleted });
 
   return session;
 };

@@ -12,6 +12,13 @@ numa versão. O branch de produção é o `oragon`, e a versão de origem está 
 - `apps/builder/next.config.mjs`: a variável `ORAGON_FRAME_ANCESTORS` libera o editor para ser
   embutido no menu Bot do CRM (`https://www.oragon.app.br`). Sem a variável, o comportamento é o original.
 
+- `packages/bot-engine/src/oragon/notificarOragon.ts` + 1 chamada em
+  `saveStateToDatabase.ts`: a cada resposta gravada, avisa o CRM (Edge Function
+  `bot-resultado`) com a lista pergunta → resposta e as variáveis — é a
+  integração automática bot → CRM, sem bloco HTTP no fluxo. Roda em `after()`
+  (depois da resposta ao lead). Liga com `ORAGON_RESULT_WEBHOOK_URL` e
+  `ORAGON_RESULT_WEBHOOK_SECRET` no projeto dos bots (viewer); sem elas, não faz nada.
+
 ## Licença
 
 A licença é FSL-1.1-Apache-2.0 (veja `LICENSE`). O uso permitido aqui: a equipe GrowX monta os bots para os

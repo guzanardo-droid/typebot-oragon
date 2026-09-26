@@ -1,7 +1,6 @@
 import { isInputBlock } from "@typebot.io/blocks-core/helpers";
 import type { Block } from "@typebot.io/blocks-core/schemas/schema";
 import type { SessionState } from "@typebot.io/chat-session/schemas";
-import { parseVariables } from "@typebot.io/variables/parseVariables";
 import { after } from "next/server";
 
 /**
@@ -66,7 +65,14 @@ const montarPayload = ({
   if (!atual) return;
   const { typebot, answers } = atual;
   const variaveis = typebot.variables;
-  const textoComVariaveis = parseVariables(variaveis);
+  // `{{nome}}` → valor, pra pergunta ler como a pessoa leu. Substituição
+  // simples de propósito (o parseVariables do Typebot exige o sessionStore).
+  const textoComVariaveis = (texto: string) =>
+    texto.replace(/\{\{([^{}]+)\}\}/g, (inteiro, nome: string) => {
+      const valor = variaveis.find((v) => v.name === nome.trim())?.value;
+      if (valor === undefined || valor === null) return inteiro;
+      return Array.isArray(valor) ? valor.join(", ") : String(valor);
+    });
 
   // Chave da resposta → pergunta. Mesma regra do bot-engine: a variável do
   // input quando há; senão o título do grupo (+ " (n)" do 2º input em diante).
